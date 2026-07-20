@@ -9,6 +9,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
 
   #################################################
@@ -29,8 +33,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: "18"
+          cache: npm
 
       - name: Install Dependencies
         run: npm ci
@@ -58,18 +62,59 @@ jobs:
 
       - name: Set Image Tag
         id: vars
-        run: echo "tag=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        run: echo "tag=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Build Docker Image
         run: |
           docker build -t my-app:${{ steps.vars.outputs.tag }} .
 
       - name: Run Trivy Vulnerability Scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.33.1
         with:
-          image-ref: 'my-app:${{ steps.vars.outputs.tag }}'
-          format: 'table'
-          exit-code: '1'
+          image-ref: my-app:${{ steps.vars.outputs.tag }}
+          format: table
+          exit-code: "1"
           ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'HIGH,CRITICAL'
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tag Image for GHCR
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          docker tag my-app:${{ steps.vars.outputs.tag }} ghcr.io/$REPO_LOWER/my-app:${{ steps.vars.outputs.tag }}
+          docker tag my-app:${{ steps.vars.outputs.tag }} ghcr.io/$REPO_LOWER/my-app:latest
+
+      - name: Push Image to GHCR
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          docker push ghcr.io/$REPO_LOWER/my-app:${{ steps.vars.outputs.tag }}
+          docker push ghcr.io/$REPO_LOWER/my-app:latest
+
+  #################################################
+  # Job 3 - Deploy to Staging
+  #################################################
+
+  deploy-staging:
+
+    needs: build-and-scan
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    runs-on: ubuntu-latest
+
+    environment: staging
+
+    steps:
+
+      - name: Simulate Staging Deployment
+        run: |
+          echo "Deploying image to STAGING environment..."
+          echo "Pulling image from GHCR..."
+          echo "Deployment to staging successful!"
