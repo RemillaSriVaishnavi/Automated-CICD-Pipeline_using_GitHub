@@ -69,14 +69,14 @@ jobs:
           docker build -t my-app:${{ steps.vars.outputs.tag }} .
 
       - name: Run Trivy Vulnerability Scanner
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@0.32.0
         with:
-          image-ref: my-app:${{ steps.vars.outputs.tag }}
-          format: table
-          exit-code: "1"
+          image-ref: 'my-app:${{ steps.vars.outputs.tag }}'
+          format: 'table'
+          exit-code: '1'
           ignore-unfixed: true
-          vuln-type: os,library
-          severity: HIGH,CRITICAL
+          vuln-type: 'os,library'
+          severity: 'HIGH,CRITICAL'
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
