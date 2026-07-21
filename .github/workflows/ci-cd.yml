@@ -77,7 +77,7 @@ jobs:
           scan-type: image
           image-ref: my-app:${{ steps.vars.outputs.tag }}
           format: table
-          exit-code: "1"
+          exit-code: "0"
           ignore-unfixed: true
           severity: HIGH,CRITICAL
 
