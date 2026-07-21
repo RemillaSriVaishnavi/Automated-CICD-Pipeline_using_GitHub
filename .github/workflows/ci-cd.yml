@@ -121,3 +121,25 @@ jobs:
           echo "Deploying image to STAGING environment..."
           echo "Pulling image from GHCR..."
           echo "Deployment to staging successful!"
+
+  #################################################
+  # Job 4 - Deploy to Production
+  #################################################
+
+  deploy-production:
+
+    needs: deploy-staging
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    runs-on: ubuntu-latest
+
+    environment: production
+
+    steps:
+
+      - name: Simulate Production Deployment
+        run: |
+          echo "Manual approval received."
+          echo "Deploying image to PRODUCTION environment..."
+          echo "Production deployment successful!"
