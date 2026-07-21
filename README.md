@@ -179,21 +179,6 @@ The GitHub Actions workflow performs:
 - Manual Approval
 - Deploy to Production
 
-
-# 📷 Screenshots
-
-Add screenshots for:
-
-- GitHub Actions Workflow
-- Successful Build
-- Trivy Scan
-- GHCR Package
-- Staging Deployment
-- Waiting for Manual Approval
-- Production Deployment
-- GitHub Environments
-
-
 ## Key Learning Outcomes
 
 - GitHub Actions
